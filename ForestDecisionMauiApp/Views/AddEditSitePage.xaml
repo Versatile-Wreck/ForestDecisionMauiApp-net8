@@ -1,0 +1,38 @@
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewModels="clr-namespace:ForestDecisionMauiApp.ViewModels"
+             xmlns:models="clr-namespace:ForestDecisionMauiApp.Models"
+             x:Class="ForestDecisionMauiApp.Views.AddEditSitePage"
+             x:DataType="viewModels:AddEditSiteViewModel"
+             Title="{Binding PageTitle}">
+    <ScrollView>
+        <VerticalStackLayout Spacing="10" Padding="20">
+            <Label Text="{Binding PageTitle}" FontSize="Header" HorizontalOptions="Center" Margin="0,0,0,20"/>
+
+            <Label Text="监测点ID:"/>
+            <Entry Text="{Binding SiteID}" IsEnabled="{Binding IsEditMode, Converter={StaticResource InverseBoolConverter}}" Placeholder="例如：SITE-001"/>
+            <Label Text="位置描述:"/>
+            <Editor Text="{Binding LocationDescription}" Placeholder="详细描述监测点位置" AutoSize="TextChanges" HeightRequest="80"/>
+
+            <Label Text="林龄组:"/>
+            <Picker ItemsSource="{Binding AgeClasses}" SelectedItem="{Binding SelectedAgeClass}" 
+                    ItemDisplayBinding="{Binding Converter={StaticResource EnumToStringConverter}}"/>
+
+            <Label Text="立地指数:"/>
+            <Entry Text="{Binding SiteIndex}" Keyboard="Numeric"/>
+
+            <Label Text="小区类型:"/>
+            <Picker ItemsSource="{Binding PlotTypes}" SelectedItem="{Binding SelectedPlotType}"
+                    ItemDisplayBinding="{Binding Converter={StaticResource EnumToStringConverter}}"/>
+
+            <Label Text="面积 (公顷，可选):"/>
+            <Entry Text="{Binding AreaHectaresStr}" Placeholder="例如：1.5" Keyboard="Numeric"/>
+
+            <Label Text="{Binding ErrorMessage}" TextColor="Red" IsVisible="{Binding ErrorMessage, Converter={StaticResource IsNotNullOrEmptyStringConverter}}"/>
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="10" Margin="0,20,0,0">
+                <Button Grid.Column="0" Text="保存" Command="{Binding SaveSiteCommand}" Style="{StaticResource PrimaryAction}"/>
+                <Button Grid.Column="1" Text="取消" Command="{Binding CancelCommand}" Style="{StaticResource SecondaryAction}"/>
+            </Grid>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

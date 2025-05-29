@@ -1,0 +1,26 @@
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewModels="clr-namespace:ForestDecisionMauiApp.ViewModels"
+             xmlns:models="clr-namespace:ForestDecisionMauiApp.Models" x:Class="ForestDecisionMauiApp.Views.RegisterPage"
+             x:DataType="viewModels:RegisterViewModel"
+             Title="用户注册">
+    <ScrollView>
+        <VerticalStackLayout Spacing="15" Padding="30" VerticalOptions="Center">
+            <Label Text="创建新账户" FontSize="Header" HorizontalOptions="Center" Margin="0,0,0,20"/>
+
+            <Entry Placeholder="用户名" Text="{Binding Username}" />
+            <Entry Placeholder="密码" Text="{Binding Password}" IsPassword="True" />
+            <Entry Placeholder="确认密码" Text="{Binding ConfirmPassword}" IsPassword="True" />
+            <Entry Placeholder="全名" Text="{Binding FullName}" />
+
+            <Label Text="选择角色:" Margin="0,10,0,0"/>
+            <Picker Title="选择角色"
+                    ItemsSource="{Binding Roles}"
+                    SelectedItem="{Binding SelectedRole}"
+                    ItemDisplayBinding="{Binding Converter={StaticResource EnumToStringConverter}}"/>
+            <Button Text="注册" Command="{Binding RegisterCommand}" HorizontalOptions="Fill" Margin="0,20,0,0"/>
+            <Button Text="返回登录" Command="{Binding GoBackToLoginCommand}" HorizontalOptions="Fill" Margin="0,10,0,0" Style="{StaticResource SecondaryButton}"/>
+            <Label Text="{Binding RegisterMessage}" TextColor="Red" HorizontalOptions="Center" Margin="0,10,0,0"/>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>
