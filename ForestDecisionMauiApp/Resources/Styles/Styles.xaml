@@ -424,4 +424,29 @@
         <Setter Property="SelectedTabColor" Value="{AppThemeBinding Light={StaticResource Gray950}, Dark={StaticResource Gray200}}" />
     </Style>
 
+    <Style x:Key="SecondaryAction" TargetType="Button">
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light=LightSlateGray, Dark=DarkSlateGray}" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light=White, Dark=WhiteSmoke}" />
+        <Setter Property="CornerRadius" Value="8"/>
+        <Setter Property="Padding" Value="14,10"/>
+        <Setter Property="BorderColor" Value="Transparent"/>
+        <Setter Property="BorderWidth" Value="0"/>
+    </Style>
+
+    <Style x:Key="PrimaryAction" TargetType="Button">
+        <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light=White, Dark=Black}" />
+        <Setter Property="CornerRadius" Value="8"/>
+        <Setter Property="Padding" Value="14,10"/>
+    </Style>
+
+    <Style x:Key="EditButton" TargetType="Button" BasedOn="{StaticResource SecondaryAction}">
+        <Setter Property="BackgroundColor" Value="ForestGreen" />
+        <Setter Property="TextColor" Value="White" />
+    </Style>
+    <Style x:Key="DeleteButton" TargetType="Button" BasedOn="{StaticResource SecondaryAction}">
+        <Setter Property="BackgroundColor" Value="IndianRed" />
+        <Setter Property="TextColor" Value="White" />
+    </Style>
+
 </ResourceDictionary>
