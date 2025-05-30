@@ -7,6 +7,10 @@ using CommunityToolkit.Mvvm.Input;
 using ForestDecisionMauiApp.Models;
 using ForestDecisionMauiApp.Services;
 using ForestDecisionMauiApp.Views; // 用于可能的导航
+using CommunityToolkit.Maui.Storage; // <--- 添加 using for FileSaver
+using System.IO;                   // <--- 添加 using for FileStream and Path
+using System.Threading;            // <--- 添加 using for CancellationToken
+using Microsoft.Data.Sqlite; // <--- 确保引入 Microsoft.Data.Sqlite
 
 namespace ForestDecisionMauiApp.ViewModels
 {
@@ -244,6 +248,170 @@ namespace ForestDecisionMauiApp.ViewModels
 
         // MainDataPage.xaml.cs 中的 OnAppearing 方法现在应该更积极地刷新数据
         // public async Task RefreshDataAsync() { await LoadSitesAsync(); } // 新增一个公共方法
+
+        [RelayCommand]
+        private async Task BackupDatabaseAsync()
+        {
+            IsBusy = true;
+            try
+            {
+                string currentDbPath = _dbService.DatabasePath; // 从 DatabaseService 获取当前数据库路径
+                if (string.IsNullOrWhiteSpace(currentDbPath) || !File.Exists(currentDbPath))
+                {
+                    await Application.Current.MainPage.DisplayAlert("备份错误", "无法找到当前的数据库文件。", "好的");
+                    IsBusy = false;
+                    return;
+                }
+
+                var suggestedFileName = $"ForestDB_Backup_{DateTime.Now:yyyyMMdd_HHmmss}.db";
+
+                // 1. 让用户选择备份文件的保存位置和名称，我们只需要目标路径
+                //    这里我们仍然可以使用 FileSaver 来获取用户选择的路径，但我们不会给它流。
+                //    或者，我们需要一个能返回“另存为”路径的对话框。
+                //    对于 Windows，可以考虑使用特定平台的API，或者 CommunityToolkit 中的 FolderPicker + 手动输入文件名。
+                //    为了简化，我们先假设能通过某种方式获取到 `targetBackupFilePath`。
+                //    一个简单的方式是，我们先创建一个临时的空文件流，让FileSaver帮我们获取路径。
+
+                string targetBackupFilePath = null;
+                using (var dummyStream = new MemoryStream()) // 创建一个虚拟的空流
+                {
+                    // 使用 FileSaver 来获取用户选择的保存路径
+                    var fileSaverResult = await FileSaver.Default.SaveAsync(suggestedFileName, dummyStream, CancellationToken.None);
+                    if (fileSaverResult.IsSuccessful && !string.IsNullOrWhiteSpace(fileSaverResult.FilePath))
+                    {
+                        targetBackupFilePath = fileSaverResult.FilePath;
+                    }
+                    else
+                    {
+                        string errorMessage = fileSaverResult.Exception?.Message ?? "用户取消了操作或未能选择文件路径。";
+                        if (!fileSaverResult.IsSuccessful && string.IsNullOrWhiteSpace(fileSaverResult.FilePath)) // 用户取消
+                        {
+                            // 用户取消，静默处理或给一个温和提示
+                            Console.WriteLine("用户取消了备份操作。");
+                            IsBusy = false;
+                            return;
+                        }
+                        await Application.Current.MainPage.DisplayAlert("选择路径失败", $"未能获取备份文件保存路径: {errorMessage}", "好的");
+                        IsBusy = false;
+                        return;
+                    }
+                }
+
+                // 确保我们确实有了一个路径
+                if (string.IsNullOrWhiteSpace(targetBackupFilePath))
+                {
+                    IsBusy = false;
+                    return;
+                }
+
+                // 2. 执行 SQLite 在线备份
+                //    注意：这里的源连接不应在 using 块内立即关闭，BackupDatabase 需要它保持打开。
+                //    DatabaseService 应该提供一个获取活动连接的方法，或者我们在这里创建一个新的源连接。
+                //    为了简单，我们假设 DatabaseService 内部的连接管理是可靠的，
+                //    我们直接使用其连接字符串创建源和目标连接。
+
+                // 清理连接池，确保我们拿到的是最新的状态或者避免冲突
+                SqliteConnection.ClearAllPools();
+                await Task.Delay(200); // 短暂等待
+
+                using (var sourceConnection = new SqliteConnection($"Data Source={currentDbPath}"))
+                {
+                    await sourceConnection.OpenAsync(); // 异步打开
+
+                    // 创建到目标备份文件的连接
+                    using (var destinationConnection = new SqliteConnection($"Data Source={targetBackupFilePath}"))
+                    {
+                        await destinationConnection.OpenAsync();
+
+                        // 执行在线备份
+                        // 从 sourceConnection 备份到 destinationConnection
+                        sourceConnection.BackupDatabase(destinationConnection);
+                        // BackupDatabase 方法是同步的，如果数据量大，可以考虑 Task.Run
+                        // await Task.Run(() => sourceConnection.BackupDatabase(destinationConnection));
+
+                        // destinationConnection 会在 using 结束时自动关闭，将数据写入文件
+                    }
+                    // sourceConnection 会在 using 结束时自动关闭
+                }
+
+                await Application.Current.MainPage.DisplayAlert("备份成功", $"数据库已成功备份到: {targetBackupFilePath}", "好的");
+
+            }
+            catch (Exception ex)
+            {
+                // 特别处理 SqliteException 中的文件锁定错误 (SQLite Error 5: 'database is locked')
+                if (ex is SqliteException sqliteEx && sqliteEx.SqliteErrorCode == 5)
+                {
+                    await Application.Current.MainPage.DisplayAlert("备份失败", $"数据库文件当前被锁定，无法备份。请稍后再试或重启应用。\n错误: {sqliteEx.Message}", "好的");
+                }
+                else
+                {
+                    await Application.Current.MainPage.DisplayAlert("备份异常", $"备份过程中发生错误: {ex.Message}", "好的");
+                }
+            }
+            finally
+            {
+                IsBusy = false;
+            }
+        }
+
+        [RelayCommand]
+        private async Task RestoreDatabaseAsync()
+        {
+            bool confirm = await Application.Current.MainPage.DisplayAlert(
+                "恢复数据警告",
+                "恢复数据将会覆盖当前所有数据，并且操作不可逆！恢复成功后，建议重启应用程序以确保所有更改生效。\n\n您确定要继续吗？",
+                "是的，恢复",
+                "取消");
+
+            if (!confirm) return;
+
+            try
+            {
+                var pickOptions = new PickOptions
+                {
+                    PickerTitle = "请选择数据库备份文件 (.db)",
+                    // 文件类型筛选器在 Windows 上可能需要特定设置，或者接受所有文件然后验证后缀
+                    FileTypes = new FilePickerFileType(new Dictionary<DevicePlatform, IEnumerable<string>>
+                {
+                    { DevicePlatform.WinUI, new[] { ".db" } }, // 示例：仅显示 .db 文件
+                    { DevicePlatform.macOS, new[] { "db" } }, // Mac 的 UTI
+                    // 其他平台可以类似添加
+                })
+                };
+
+                var result = await FilePicker.Default.PickAsync(pickOptions);
+                if (result != null)
+                {
+                    if (result.FileName.EndsWith(".db", StringComparison.OrdinalIgnoreCase))
+                    {
+                        IsBusy = true; // 可能需要一段时间，显示忙碌指示
+                        bool success = await _dbService.RestoreDatabaseAsync(result.FullPath);
+                        IsBusy = false;
+
+                        if (success)
+                        {
+                            await Application.Current.MainPage.DisplayAlert(
+                                "恢复成功",
+                                "数据库已从备份文件恢复。\n\n强烈建议您现在重启应用程序以确保数据正确加载和应用所有迁移。",
+                                "好的");
+                            // 在这里，理想情况下应用应该关闭或提示用户手动关闭并重启。
+                            // 例如: Application.Current.Quit(); (但这可能过于突然)
+                        }
+                        // RestoreDatabaseAsync 内部会处理部分失败提示
+                    }
+                    else
+                    {
+                        await Application.Current.MainPage.DisplayAlert("文件无效", "请选择一个有效的 .db 数据库备份文件。", "好的");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                IsBusy = false;
+                await Application.Current.MainPage.DisplayAlert("恢复异常", $"恢复过程中发生错误: {ex.Message}", "好的");
+            }
+        }
 
     }
 }

@@ -49,10 +49,6 @@
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'tizen'">6.5</SupportedOSPlatformVersion>
 	</PropertyGroup>
 
-	<PropertyGroup Condition="'$(Configuration)'=='Release' AND $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">
-		<PublishTrimmed>false</PublishTrimmed>
-	</PropertyGroup>
-
 	<ItemGroup>
 		<!-- App Icon -->
 		<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#512BD4" />
@@ -72,6 +68,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<PackageReference Include="CommunityToolkit.Maui" Version="9.1.1" />
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
 		<PackageReference Include="Microsoft.Data.Sqlite" Version="9.0.5" />
 		<PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />

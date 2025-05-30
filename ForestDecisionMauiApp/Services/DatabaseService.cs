@@ -20,12 +20,212 @@ namespace ForestDecisionMauiApp.Services
             _databasePath = Path.Combine(appSpecificFolder, "forest_system.db");
 
             InitializeDatabase();
+            // ApplyMigrations();    // 应用数据库迁移
         }
+
+        private int GetCurrentSchemaVersion()
+        {
+            using (var connection = new SqliteConnection(GetConnectionString()))
+            {
+                connection.Open();
+                var command = connection.CreateCommand();
+                command.CommandText = "SELECT Value FROM AppDbInfo WHERE Key = 'SchemaVersion';";
+                var result = command.ExecuteScalar();
+                if (result != null && int.TryParse(result.ToString(), out int version))
+                {
+                    return version;
+                }
+                return 0; // 或者 1，取决于你的初始版本定义
+            }
+        }
+
+        private void SetSchemaVersion(SqliteConnection connection, SqliteTransaction transaction, int version)
+        {
+            var command = connection.CreateCommand();
+            command.Transaction = transaction;
+            command.CommandText = "UPDATE AppDbInfo SET Value = $version WHERE Key = 'SchemaVersion';";
+            command.Parameters.AddWithValue("$version", version.ToString());
+            command.ExecuteNonQuery();
+        }
+
+        private void ApplyMigrations()
+        {
+            using (var connection = new SqliteConnection(GetConnectionString()))
+            {
+                connection.Open();
+                int currentVersion = GetCurrentSchemaVersion(connection); // 在 ApplyMigrations 的开头获取版本号，然后在这里传递连接
+
+                Console.WriteLine($"当前数据库 Schema 版本: {currentVersion}");
+
+                // 确保在事务中执行迁移
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                        if (currentVersion < 2) // 迁移到版本 2
+                        {
+                            Console.WriteLine("应用迁移：版本 1 -> 2");
+                            var migrateCmd_1_2 = connection.CreateCommand();
+                            migrateCmd_1_2.Transaction = transaction;
+                            migrateCmd_1_2.CommandText = @"
+                          ALTER TABLE MonitoringSites ADD COLUMN LastInspectedDate TEXT;
+                          ALTER TABLE Users ADD COLUMN Email TEXT;
+                      "; // 示例：添加新列
+                            migrateCmd_1_2.ExecuteNonQuery();
+                            SetSchemaVersion(connection, transaction, 2);
+                            currentVersion = 2; // 更新当前版本以便后续迁移
+                            Console.WriteLine("迁移到版本 2 成功。");
+                        }
+
+                        if (currentVersion < 3) // 迁移到版本 3
+                        {
+                            Console.WriteLine("应用迁移：版本 2 -> 3");
+                            var migrateCmd_2_3 = connection.CreateCommand();
+                            migrateCmd_2_3.Transaction = transaction;
+                            // 示例：创建新表，并从旧表迁移数据（如果需要）
+                            migrateCmd_2_3.CommandText = @"
+                          CREATE TABLE IF NOT EXISTS SiteNotes (
+                              NoteID TEXT PRIMARY KEY,
+                              SiteID TEXT NOT NULL,
+                              NoteText TEXT,
+                              CreatedAt TEXT NOT NULL,
+                              FOREIGN KEY (SiteID) REFERENCES MonitoringSites(SiteID) ON DELETE CASCADE
+                          );
+                      ";
+                            migrateCmd_2_3.ExecuteNonQuery();
+                            SetSchemaVersion(connection, transaction, 3);
+                            currentVersion = 3;
+                            Console.WriteLine("迁移到版本 3 成功。");
+                        }
+                        // 添加更多版本的迁移逻辑...
+
+                        transaction.Commit();
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"数据库迁移失败: {ex.Message}");
+                        transaction.Rollback();
+                        // 关键错误，可能需要通知用户或记录日志
+                        // 不应继续运行可能依赖新schema的应用代码
+                        throw; // 重新抛出异常，让应用知道初始化失败
+                    }
+                }
+            }
+        }
+        // 调整 GetCurrentSchemaVersion 使其能在 ApplyMigrations 内部使用已打开的连接
+        private int GetCurrentSchemaVersion(SqliteConnection connection)
+        {
+            var command = connection.CreateCommand(); // 不需要再打开/关闭连接
+            command.CommandText = "SELECT Value FROM AppDbInfo WHERE Key = 'SchemaVersion';";
+            var result = command.ExecuteScalar();
+            if (result != null && int.TryParse(result.ToString(), out int version))
+            {
+                return version;
+            }
+            // 如果 AppDbInfo 表或 SchemaVersion 键不存在，意味着是全新的v1数据库
+            // 或者是一个非常早期的、没有版本信息的数据库。
+            // InitializeDatabase 应该确保 SchemaVersion 至少为 '1'。
+            return 1; // 假设最低版本为1
+        }
+        // 在 ApplyMigrations 中调用 GetCurrentSchemaVersion(connection)
 
         private string GetConnectionString()
         {
             return $"Data Source={_databasePath}";
         }
+
+        // Services/DatabaseService.cs
+        // ...
+
+        // 新增一个公共属性或方法来获取数据库路径，以便ViewModel使用
+        public string DatabasePath => _databasePath;
+
+        public async Task<bool> BackupDatabaseAsync(string targetBackupFilePath)
+        {
+            // 确保目标路径不为空
+            if (string.IsNullOrWhiteSpace(targetBackupFilePath))
+            {
+                Console.WriteLine("备份路径无效。");
+                return false;
+            }
+
+            // 确保当前数据库连接已尽可能关闭，以避免文件锁定
+            // Microsoft.Data.Sqlite 通常在连接关闭后会释放文件，但连接池可能保持连接。
+            // 清理连接池是一种更彻底的方式，但要注意这会影响所有使用该连接字符串的连接。
+            SqliteConnection.ClearAllPools(); // 清理所有连接池中的连接
+
+            // 短暂延迟，给操作系统一点时间释放文件锁（可选，但有时有帮助）
+            await Task.Delay(200);
+
+            try
+            {
+                File.Copy(_databasePath, targetBackupFilePath, true); // true 表示如果目标文件已存在则覆盖
+                Console.WriteLine($"数据库成功备份到: {targetBackupFilePath}");
+                return true;
+            }
+            catch (IOException ioEx) // 特别处理IO异常，可能是文件被占用
+            {
+                Console.WriteLine($"备份数据库时发生IO错误 (可能文件仍被占用): {ioEx.Message}");
+                // 提示用户：如果备份失败，尝试重启应用后再试
+                await Application.Current.MainPage.DisplayAlert("备份失败", "文件操作错误，可能数据库文件仍被占用。请尝试重启应用后再进行备份。", "好的");
+                return false;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"备份数据库失败: {ex.Message}");
+                await Application.Current.MainPage.DisplayAlert("备份失败", $"发生未知错误: {ex.Message}", "好的");
+                return false;
+            }
+        }
+
+        public async Task<bool> RestoreDatabaseAsync(string sourceBackupFilePath)
+        {
+            if (string.IsNullOrWhiteSpace(sourceBackupFilePath) || !File.Exists(sourceBackupFilePath))
+            {
+                Console.WriteLine("无效的备份文件路径或文件不存在。");
+                await Application.Current.MainPage.DisplayAlert("恢复失败", "选择的备份文件无效或不存在。", "好的");
+                return false;
+            }
+
+            // 非常重要：关闭所有到当前数据库的连接并清理连接池
+            Console.WriteLine("正在关闭数据库连接以进行恢复...");
+            SqliteConnection.ClearAllPools();
+
+            // GC.Collect(); // 有时可以帮助加速文件锁的释放
+            // GC.WaitForPendingFinalizers();
+            await Task.Delay(500); // 给与更长的延迟确保文件锁释放
+
+            try
+            {
+                // 删除 (或重命名) 当前的数据库文件
+                if (File.Exists(_databasePath))
+                {
+                    File.Delete(_databasePath);
+                    // 或者重命名: File.Move(_databasePath, _databasePath + ".old_backup_" + DateTime.Now.ToString("yyyyMMddHHmmss"));
+                }
+
+                File.Copy(sourceBackupFilePath, _databasePath, true);
+                Console.WriteLine($"数据库成功从 {sourceBackupFilePath} 恢复。");
+
+                // 重要提示：恢复后，应用需要重新初始化数据库连接和状态。
+                // 最简单可靠的方式是提示用户重启应用。
+                // 或者，如果你的应用设计允许，可以尝试重新初始化 DatabaseService 和相关的 ViewModel。
+                return true;
+            }
+            catch (IOException ioEx)
+            {
+                Console.WriteLine($"恢复数据库时发生IO错误 (可能文件仍被占用): {ioEx.Message}");
+                await Application.Current.MainPage.DisplayAlert("恢复失败", "文件操作错误，可能数据库文件仍被占用。请尝试重启应用后再进行恢复，或确保没有其他程序正在访问数据库文件。", "好的");
+                return false;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"恢复数据库失败: {ex.Message}");
+                await Application.Current.MainPage.DisplayAlert("恢复失败", $"发生未知错误: {ex.Message}", "好的");
+                return false;
+            }
+        }
+
 
         // Services/DatabaseService.cs
         // ... (保留 InitializeDatabase 方法上半部分创建 Users 表的代码) ...
@@ -42,6 +242,20 @@ namespace ForestDecisionMauiApp.Services
                 // pragmaCmd.ExecuteNonQuery();
 
                 var command = connection.CreateCommand();
+                // 版本信息表 (AppDbInfo) 用于存储应用程序的版本信息或其他元数据
+                command.CommandText = @"
+            CREATE TABLE IF NOT EXISTS AppDbInfo (
+                Key TEXT PRIMARY KEY,
+                Value TEXT
+            );
+        ";
+                command.ExecuteNonQuery();
+
+                // 设置初始版本号 (如果表是新创建的)
+                command.CommandText = "INSERT OR IGNORE INTO AppDbInfo (Key, Value) VALUES ('SchemaVersion', '1');";
+                command.ExecuteNonQuery();
+
+
                 // 创建 Users 表 (已存在)
                 command.CommandText = @"
             CREATE TABLE IF NOT EXISTS Users (

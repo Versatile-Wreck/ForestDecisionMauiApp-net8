@@ -4,6 +4,7 @@ using ForestDecisionMauiApp.Services; // Add this
 using ForestDecisionMauiApp.ViewModels; // We'll create these soon
 using ForestDecisionMauiApp.Views;      // We'll create these soon
 using ForestDecisionMauiApp.Services;
+using CommunityToolkit.Maui; // <--- 添加 using
 
 namespace ForestDecisionMauiApp;
 public static class MauiProgram
@@ -13,6 +14,7 @@ public static class MauiProgram
         var builder = MauiApp.CreateBuilder();
         builder
             .UseMauiApp<App>()
+            .UseMauiCommunityToolkit() // <--- 初始化 Community Toolkit
             .ConfigureFonts(fonts =>
             {
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");

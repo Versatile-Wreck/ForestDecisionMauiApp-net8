@@ -57,6 +57,13 @@
                     <Label Text="没有监测点数据。点击“新增”或“刷新”。" HorizontalOptions="Center" VerticalOptions="Center" Margin="20"/>
                 </CollectionView.EmptyView>
             </CollectionView>
+
+            <Label Text="数据管理" FontSize="Medium" FontAttributes="Bold" Margin="0,20,0,5"/>
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                <Button Grid.Column="0" Text="备份数据" Command="{Binding BackupDatabaseCommand}" Style="{StaticResource SecondaryAction}" />
+                <Button Grid.Column="1" Text="恢复数据" Command="{Binding RestoreDatabaseCommand}" BackgroundColor="DarkOrange" TextColor="White" />
+            </Grid>
+
         </VerticalStackLayout>
 
         <ScrollView Grid.Column="1" VerticalOptions="FillAndExpand">
@@ -170,6 +177,7 @@
         </ScrollView>
 
         <Button Text="登出系统" Command="{Binding LogoutCommand}" Grid.Column="0" Grid.ColumnSpan="2" VerticalOptions="End" HorizontalOptions="Center" Margin="10"/>
-
+        
+        
     </Grid>
 </ContentPage>
