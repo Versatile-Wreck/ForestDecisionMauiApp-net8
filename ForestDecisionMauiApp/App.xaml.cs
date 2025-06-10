@@ -2,6 +2,7 @@
 using System.IO; // 用于文件操作
 using System;    // 用于 DateTime 和 Exception
 using Microsoft.Maui.ApplicationModel; // 用于 FileSystem
+using System.Diagnostics;
 
 namespace ForestDecisionMauiApp;
 
@@ -40,12 +41,12 @@ public partial class App : Application
         {
             // 将日志信息追加到文件
             File.AppendAllText(logFilePath, logMessage);
-            Console.WriteLine($"CRITICAL ERROR LOGGED TO: {logFilePath}");
+            Debug.WriteLine($"CRITICAL ERROR LOGGED TO: {logFilePath}");
         }
         catch (Exception logEx)
         {
-            Console.WriteLine($"Failed to write crash log: {logEx.Message}");
-            Console.WriteLine($"Original crash: {logMessage}");
+            Debug.WriteLine($"Failed to write crash log: {logEx.Message}");
+            Debug.WriteLine($"Original crash: {logMessage}");
         }
     }
 }

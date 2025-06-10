@@ -11,6 +11,7 @@ using CommunityToolkit.Maui.Storage; // <--- 添加 using for FileSaver
 using System.IO;                   // <--- 添加 using for FileStream and Path
 using System.Threading;            // <--- 添加 using for CancellationToken
 using Microsoft.Data.Sqlite; // <--- 确保引入 Microsoft.Data.Sqlite
+using System.Diagnostics;
 
 namespace ForestDecisionMauiApp.ViewModels
 {
@@ -111,7 +112,7 @@ namespace ForestDecisionMauiApp.ViewModels
         {
             if (SelectedSite == null || LatestReadingForDecision == null)
             {
-                // Console.WriteLine("无法生成建议：监测点或最新读数为空。");
+                // Debug.WriteLine("无法生成建议：监测点或最新读数为空。");
                 Recommendations.Clear(); // 清空旧的建议
                 // 可以添加一个默认的提示信息到Recommendations列表
                 Recommendations.Add(new DecisionRecommendation { RecommendationText = "请先选择一个监测点并确保有最新的养分数据。", Severity = RecommendationSeverity.Info });
@@ -287,7 +288,7 @@ namespace ForestDecisionMauiApp.ViewModels
                         if (!fileSaverResult.IsSuccessful && string.IsNullOrWhiteSpace(fileSaverResult.FilePath)) // 用户取消
                         {
                             // 用户取消，静默处理或给一个温和提示
-                            Console.WriteLine("用户取消了备份操作。");
+                            Debug.WriteLine("用户取消了备份操作。");
                             IsBusy = false;
                             return;
                         }

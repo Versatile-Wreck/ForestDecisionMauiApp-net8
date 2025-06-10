@@ -13,171 +13,174 @@
             <converters:InverseBoolConverter x:Key="InverseBoolConverter" />
         </ResourceDictionary>
     </ContentPage.Resources>
-
-    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10" Padding="10">
-        <VerticalStackLayout Grid.Column="0" Spacing="10" WidthRequest="350">
-            <Label Text="监测点列表" FontSize="Medium" FontAttributes="Bold"/>
+    
+    <ScrollView>
+        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10" Padding="10">
+            <VerticalStackLayout Grid.Column="0" Spacing="10" WidthRequest="350">
+                <Label Text="监测点列表" FontSize="Medium" FontAttributes="Bold"/>
             
-            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="5">
-                <Button Grid.Column="0" Text="刷新列表" Command="{Binding LoadSitesCommand}" Style="{StaticResource SecondaryAction}"/>
-                <Button Grid.Column="1" Text="＋ 新增监测点" Command="{Binding AddNewSiteCommand}" Style="{StaticResource PrimaryAction}"/>
-            </Grid>
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="5">
+                    <Button Grid.Column="0" Text="刷新列表" Command="{Binding LoadSitesCommand}" Style="{StaticResource SecondaryAction}"/>
+                    <Button Grid.Column="1" Text="＋ 新增监测点" Command="{Binding AddNewSiteCommand}" Style="{StaticResource PrimaryAction}"/>
+                </Grid>
 
-            <Label Text="选中项操作:" FontSize="Small" Margin="0,15,0,5"
-                   IsVisible="{Binding SelectedSite, Converter={StaticResource IsNotNullToBool}}"/>
-            <Grid ColumnDefinitions="*,*" ColumnSpacing="10"
-                  IsVisible="{Binding SelectedSite, Converter={StaticResource IsNotNullToBool}}">
-                <Button Grid.Column="0" Text="编辑选中项"
-                        Command="{Binding EditSiteCommand}"
-                        IsEnabled="{Binding SelectedSite, Converter={StaticResource IsNotNullToBool}}" />
-                <Button Grid.Column="1" Text="删除选中项"
-                        Command="{Binding DeleteSiteCommand}"
-                        IsEnabled="{Binding SelectedSite, Converter={StaticResource IsNotNullToBool}}"
-                        BackgroundColor="IndianRed" TextColor="White"/>
-            </Grid>
+                <Label Text="选中项操作:" FontSize="Small" Margin="0,15,0,5"
+                       IsVisible="{Binding SelectedSite, Converter={StaticResource IsNotNullToBool}}"/>
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="10"
+                      IsVisible="{Binding SelectedSite, Converter={StaticResource IsNotNullToBool}}">
+                    <Button Grid.Column="0" Text="编辑选中项"
+                            Command="{Binding EditSiteCommand}"
+                            IsEnabled="{Binding SelectedSite, Converter={StaticResource IsNotNullToBool}}" />
+                    <Button Grid.Column="1" Text="删除选中项"
+                            Command="{Binding DeleteSiteCommand}"
+                            IsEnabled="{Binding SelectedSite, Converter={StaticResource IsNotNullToBool}}"
+                            BackgroundColor="IndianRed" TextColor="White"/>
+                </Grid>
 
-            <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" HorizontalOptions="Center" />
-
-            <CollectionView ItemsSource="{Binding Sites}"
-                            SelectedItem="{Binding SelectedSite, Mode=TwoWay}"
-                            SelectionMode="Single"
-                            VerticalOptions="FillAndExpand">
-                <CollectionView.ItemTemplate>
-                    <DataTemplate x:DataType="models:MonitoringSite">
-                        <Frame Padding="10" Margin="0,0,0,5" BorderColor="{AppThemeBinding Light=LightGray, Dark=DarkGray}" CornerRadius="5" MinimumHeightRequest="70">
-                            <VerticalStackLayout>
-                                <Label Text="{Binding SiteID}" FontAttributes="Bold" FontSize="Small" />
-                                <Label Text="{Binding LocationDescription}" FontSize="Micro" LineBreakMode="TailTruncation" MaxLines="2"/>
-                                <Label Text="{Binding AgeClass, StringFormat='林龄: {0}'}" FontSize="Micro"/>
-                            </VerticalStackLayout>
-                        </Frame>
-                    </DataTemplate>
-                </CollectionView.ItemTemplate>
-                <CollectionView.EmptyView>
-                    <Label Text="没有监测点数据。点击“新增”或“刷新”。" HorizontalOptions="Center" VerticalOptions="Center" Margin="20"/>
-                </CollectionView.EmptyView>
-            </CollectionView>
-
-            <Label Text="数据管理" FontSize="Medium" FontAttributes="Bold" Margin="0,20,0,5"/>
-            <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
-                <Button Grid.Column="0" Text="备份数据" Command="{Binding BackupDatabaseCommand}" Style="{StaticResource SecondaryAction}" />
-                <Button Grid.Column="1" Text="恢复数据" Command="{Binding RestoreDatabaseCommand}" BackgroundColor="DarkOrange" TextColor="White" />
-            </Grid>
-
-        </VerticalStackLayout>
-
-        <ScrollView Grid.Column="1" VerticalOptions="FillAndExpand">
-            <VerticalStackLayout Spacing="10" IsVisible="{Binding SelectedSite, Converter={StaticResource IsNotNullToBool}}">
-                <Label Text="监测点详情" FontSize="Medium" FontAttributes="Bold"/>
-                <Frame Padding="10" BorderColor="{AppThemeBinding Light=LightSlateGray, Dark=DarkSlateGray}" CornerRadius="5">
-                    <VerticalStackLayout>
-                        <Label Text="{Binding SelectedSite.SiteID, StringFormat='ID: {0}'}" FontAttributes="Bold"/>
-                        <Label Text="{Binding SelectedSite.LocationDescription, StringFormat='位置: {0}'}" />
-                        <Label Text="{Binding SelectedSite.AgeClass, StringFormat='林龄组: {0}'}" />
-                        <Label Text="{Binding SelectedSite.SiteIndex, StringFormat='立地指数: {0}'}" />
-                        <Label Text="{Binding SelectedSite.PlotType, StringFormat='小区类型: {0}'}" />
-                        <Label Text="{Binding SelectedSite.AreaHectares, StringFormat='面积 (公顷): {0}'}" />
-                    </VerticalStackLayout>
-                </Frame>
-
-                <Label Text="养分读数记录" FontSize="Medium" FontAttributes="Bold" Margin="0,15,0,0"/>
                 <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" HorizontalOptions="Center" />
 
-                <CollectionView ItemsSource="{Binding SelectedSiteReadings}"
-                                VerticalOptions="Start">
+                <CollectionView ItemsSource="{Binding Sites}"
+                                SelectedItem="{Binding SelectedSite, Mode=TwoWay}"
+                                SelectionMode="Single"
+                                VerticalOptions="FillAndExpand">
                     <CollectionView.ItemTemplate>
-                        <DataTemplate x:DataType="models:SoilNutrientReading">
-                            <Frame Padding="10" Margin="0,0,0,5" BorderColor="{AppThemeBinding Light=LightBlue, Dark=DarkBlue}" CornerRadius="5">
-                                <VerticalStackLayout Spacing="2">
-                                    <Label Text="{Binding Timestamp, StringFormat='采集时间: {0:yyyy-MM-dd HH:mm}'}" FontAttributes="Bold" FontSize="Small"/>
-                                    <Label FontSize="Micro">
-                                        <Label.FormattedText>
-                                            <FormattedString>
-                                                <Span Text="速效氮: "/>
-                                                <Span Text="{Binding NitrogenAvailable, FallbackValue='N/A'}"/>
-                                                <Span Text=" "/>
-                                                <Span Text="{Binding Unit}"/>
-                                            </FormattedString>
-                                        </Label.FormattedText>
-                                    </Label>
-                                    <Label FontSize="Micro">
-                                        <Label.FormattedText>
-                                            <FormattedString>
-                                                <Span Text="速效磷: "/>
-                                                <Span Text="{Binding PhosphorusAvailable, FallbackValue='N/A'}"/>
-                                                <Span Text=" "/>
-                                                <Span Text="{Binding Unit}"/>
-                                            </FormattedString>
-                                        </Label.FormattedText>
-                                    </Label>
-                                    <Label FontSize="Micro">
-                                        <Label.FormattedText>
-                                            <FormattedString>
-                                                <Span Text="速效钾: "/>
-                                                <Span Text="{Binding PotassiumAvailable, FallbackValue='N/A'}"/>
-                                                <Span Text=" "/>
-                                                <Span Text="{Binding Unit}"/>
-                                            </FormattedString>
-                                        </Label.FormattedText>
-                                    </Label>
-                                    <Label Text="{Binding DataSource, StringFormat='来源: {0}'}" FontSize="Micro"/>
+                        <DataTemplate x:DataType="models:MonitoringSite">
+                            <Frame Padding="10" Margin="0,0,0,5" BorderColor="{AppThemeBinding Light=LightGray, Dark=DarkGray}" CornerRadius="5" MinimumHeightRequest="70">
+                                <VerticalStackLayout>
+                                    <Label Text="{Binding SiteID}" FontAttributes="Bold" FontSize="Small" />
+                                    <Label Text="{Binding LocationDescription}" FontSize="Micro" LineBreakMode="TailTruncation" MaxLines="2"/>
+                                    <Label Text="{Binding AgeClass, StringFormat='林龄: {0}'}" FontSize="Micro"/>
                                 </VerticalStackLayout>
                             </Frame>
                         </DataTemplate>
                     </CollectionView.ItemTemplate>
                     <CollectionView.EmptyView>
-                        <Label Text="该监测点没有养分读数记录。" HorizontalOptions="Center" VerticalOptions="Center" Margin="20"/>
+                        <Label Text="没有监测点数据。点击“新增”或“刷新”。" HorizontalOptions="Center" VerticalOptions="Center" Margin="20"/>
                     </CollectionView.EmptyView>
                 </CollectionView>
 
-                <Label Text="智能决策建议" FontSize="Medium" FontAttributes="Bold" Margin="0,20,0,5"/>
-                <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" HorizontalOptions="Center" />
-
-                <CollectionView ItemsSource="{Binding Recommendations}" Margin="0,0,0,10">
-                    <CollectionView.ItemTemplate>
-                        <DataTemplate x:DataType="models:DecisionRecommendation">
-                            <Frame Padding="10" Margin="0,0,0,5" CornerRadius="5">
-                                <Frame.Triggers>
-                                    <DataTrigger TargetType="Frame" Binding="{Binding Severity}" Value="{x:Static models:RecommendationSeverity.Warning}">
-                                        <Setter Property="BorderColor" Value="Orange" />
-                                    </DataTrigger>
-                                    <DataTrigger TargetType="Frame" Binding="{Binding Severity}" Value="{x:Static models:RecommendationSeverity.Critical}">
-                                        <Setter Property="BorderColor" Value="Red" />
-                                    </DataTrigger>
-                                    <DataTrigger TargetType="Frame" Binding="{Binding Severity}" Value="{x:Static models:RecommendationSeverity.Suggestion}">
-                                        <Setter Property="BorderColor" Value="ForestGreen" />
-                                    </DataTrigger>
-                                    <DataTrigger TargetType="Frame" Binding="{Binding Severity}" Value="{x:Static models:RecommendationSeverity.Info}">
-                                        <Setter Property="BorderColor" Value="LightSkyBlue" />
-                                    </DataTrigger>
-                                </Frame.Triggers>
-                                <VerticalStackLayout Spacing="3">
-                                    <Label FontSize="Small" FontAttributes="Bold">
-                                        <Label.FormattedText>
-                                            <FormattedString>
-                                                <Span Text="["/>
-                                                <Span Text="{Binding Severity}"/>
-                                                <Span Text="] "/>
-                                                <Span Text="{Binding RecommendationText}"/>
-                                            </FormattedString>
-                                        </Label.FormattedText>
-                                    </Label>
-                                    <Label Text="{Binding Basis, StringFormat='依据: {0}'}" FontSize="Micro" TextColor="Gray"/>
-                                    <Label Text="{Binding GeneratedAt, StringFormat='生成时间: {0:yyyy-MM-dd HH:mm}'}" FontSize="Micro" TextColor="Gray"/>
-                                </VerticalStackLayout>
-                            </Frame>
-                        </DataTemplate>
-                    </CollectionView.ItemTemplate>
-                    <CollectionView.EmptyView>
-                        <Label Text="暂无决策建议或正在生成中..." HorizontalOptions="Center" VerticalOptions="Center" Margin="20"/>
-                    </CollectionView.EmptyView>
-                </CollectionView>
+                <Label Text="数据管理" FontSize="Medium" FontAttributes="Bold" Margin="0,20,0,5"/>
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                    <Button Grid.Column="0" Text="备份数据" Command="{Binding BackupDatabaseCommand}" Style="{StaticResource SecondaryAction}" />
+                    <Button Grid.Column="1" Text="恢复数据" Command="{Binding RestoreDatabaseCommand}" BackgroundColor="DarkOrange" TextColor="White" />
+                </Grid>
 
             </VerticalStackLayout>
-        </ScrollView>
 
-        <Button Text="登出系统" Command="{Binding LogoutCommand}" Grid.Column="0" Grid.ColumnSpan="2" VerticalOptions="End" HorizontalOptions="Center" Margin="10"/>
+            <ScrollView Grid.Column="1" VerticalOptions="FillAndExpand">
+                <VerticalStackLayout Spacing="10" IsVisible="{Binding SelectedSite, Converter={StaticResource IsNotNullToBool}}">
+                    <Label Text="监测点详情" FontSize="Medium" FontAttributes="Bold"/>
+                    <Frame Padding="10" BorderColor="{AppThemeBinding Light=LightSlateGray, Dark=DarkSlateGray}" CornerRadius="5">
+                        <VerticalStackLayout>
+                            <Label Text="{Binding SelectedSite.SiteID, StringFormat='ID: {0}'}" FontAttributes="Bold"/>
+                            <Label Text="{Binding SelectedSite.LocationDescription, StringFormat='位置: {0}'}" />
+                            <Label Text="{Binding SelectedSite.AgeClass, StringFormat='林龄组: {0}'}" />
+                            <Label Text="{Binding SelectedSite.SiteIndex, StringFormat='立地指数: {0}'}" />
+                            <Label Text="{Binding SelectedSite.PlotType, StringFormat='小区类型: {0}'}" />
+                            <Label Text="{Binding SelectedSite.AreaHectares, StringFormat='面积 (公顷): {0}'}" />
+                        </VerticalStackLayout>
+                    </Frame>
+
+                    <Label Text="智能决策建议" FontSize="Medium" FontAttributes="Bold" Margin="0,20,0,5"/>
+                    <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" HorizontalOptions="Center" />
+
+                    <CollectionView ItemsSource="{Binding Recommendations}" Margin="0,0,0,10">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="models:DecisionRecommendation">
+                                <Frame Padding="10" Margin="0,0,0,5" CornerRadius="5">
+                                    <Frame.Triggers>
+                                        <DataTrigger TargetType="Frame" Binding="{Binding Severity}" Value="{x:Static models:RecommendationSeverity.Warning}">
+                                            <Setter Property="BorderColor" Value="Orange" />
+                                        </DataTrigger>
+                                        <DataTrigger TargetType="Frame" Binding="{Binding Severity}" Value="{x:Static models:RecommendationSeverity.Critical}">
+                                            <Setter Property="BorderColor" Value="Red" />
+                                        </DataTrigger>
+                                        <DataTrigger TargetType="Frame" Binding="{Binding Severity}" Value="{x:Static models:RecommendationSeverity.Suggestion}">
+                                            <Setter Property="BorderColor" Value="ForestGreen" />
+                                        </DataTrigger>
+                                        <DataTrigger TargetType="Frame" Binding="{Binding Severity}" Value="{x:Static models:RecommendationSeverity.Info}">
+                                            <Setter Property="BorderColor" Value="LightSkyBlue" />
+                                        </DataTrigger>
+                                    </Frame.Triggers>
+                                    <VerticalStackLayout Spacing="3">
+                                        <Label FontSize="Small" FontAttributes="Bold">
+                                            <Label.FormattedText>
+                                                <FormattedString>
+                                                    <Span Text="["/>
+                                                    <Span Text="{Binding Severity}"/>
+                                                    <Span Text="] "/>
+                                                    <Span Text="{Binding RecommendationText}"/>
+                                                </FormattedString>
+                                            </Label.FormattedText>
+                                        </Label>
+                                        <Label Text="{Binding Basis, StringFormat='依据: {0}'}" FontSize="Micro" TextColor="Gray"/>
+                                        <Label Text="{Binding GeneratedAt, StringFormat='生成时间: {0:yyyy-MM-dd HH:mm}'}" FontSize="Micro" TextColor="Gray"/>
+                                    </VerticalStackLayout>
+                                </Frame>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                        <CollectionView.EmptyView>
+                            <Label Text="暂无决策建议或正在生成中..." HorizontalOptions="Center" VerticalOptions="Center" Margin="20"/>
+                        </CollectionView.EmptyView>
+                    </CollectionView>
+
+                    <Label Text="养分读数记录" FontSize="Medium" FontAttributes="Bold" Margin="0,15,0,0"/>
+                    <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" HorizontalOptions="Center" />
+
+                    <CollectionView ItemsSource="{Binding SelectedSiteReadings}"
+                                    VerticalOptions="Start">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="models:SoilNutrientReading">
+                                <Frame Padding="10" Margin="0,0,0,5" BorderColor="{AppThemeBinding Light=LightBlue, Dark=DarkBlue}" CornerRadius="5">
+                                    <VerticalStackLayout Spacing="2">
+                                        <Label Text="{Binding Timestamp, StringFormat='采集时间: {0:yyyy-MM-dd HH:mm}'}" FontAttributes="Bold" FontSize="Small"/>
+                                        <Label FontSize="Micro">
+                                            <Label.FormattedText>
+                                                <FormattedString>
+                                                    <Span Text="速效氮: "/>
+                                                    <Span Text="{Binding NitrogenAvailable, FallbackValue='N/A'}"/>
+                                                    <Span Text=" "/>
+                                                    <Span Text="{Binding Unit}"/>
+                                                </FormattedString>
+                                            </Label.FormattedText>
+                                        </Label>
+                                        <Label FontSize="Micro">
+                                            <Label.FormattedText>
+                                                <FormattedString>
+                                                    <Span Text="速效磷: "/>
+                                                    <Span Text="{Binding PhosphorusAvailable, FallbackValue='N/A'}"/>
+                                                    <Span Text=" "/>
+                                                    <Span Text="{Binding Unit}"/>
+                                                </FormattedString>
+                                            </Label.FormattedText>
+                                        </Label>
+                                        <Label FontSize="Micro">
+                                            <Label.FormattedText>
+                                                <FormattedString>
+                                                    <Span Text="速效钾: "/>
+                                                    <Span Text="{Binding PotassiumAvailable, FallbackValue='N/A'}"/>
+                                                    <Span Text=" "/>
+                                                    <Span Text="{Binding Unit}"/>
+                                                </FormattedString>
+                                            </Label.FormattedText>
+                                        </Label>
+                                        <Label Text="{Binding DataSource, StringFormat='来源: {0}'}" FontSize="Micro"/>
+                                    </VerticalStackLayout>
+                                </Frame>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                        <CollectionView.EmptyView>
+                            <Label Text="该监测点没有养分读数记录。" HorizontalOptions="Center" VerticalOptions="Center" Margin="20"/>
+                        </CollectionView.EmptyView>
+                    </CollectionView>
+
+                </VerticalStackLayout>
+            </ScrollView>
+
+            <Button Text="登出系统" Command="{Binding LogoutCommand}" Grid.Column="0" Grid.ColumnSpan="2" VerticalOptions="End" HorizontalOptions="Center" Margin="10"/>
         
         
-    </Grid>
+        </Grid>
+
+    </ScrollView>
 </ContentPage>

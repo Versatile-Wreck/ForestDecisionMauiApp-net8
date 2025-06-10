@@ -4,46 +4,44 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using ForestDecisionMauiApp.Models;
+using System.Diagnostics;
 
 namespace ForestDecisionMauiApp.Services
 {
+
+    /* 
+    主要负责：
+            用户注册：创建新用户账户
+            用户登录：验证用户身份
+            密码安全：对密码进行加密处理
+    */
     public class UserService
     {
+        // 依赖注入的 DatabaseService 实例
         private readonly DatabaseService _dbService; // 依赖 DatabaseService
 
-        // 修改构造函数
         public UserService(DatabaseService dbService)
         {
             _dbService = dbService;
         }
 
-        private string HashPassword(string password)
-        {
-            // (保留之前的 HashPassword 方法)
-            using (SHA256 sha256 = SHA256.Create())
-            {
-                byte[] bytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
-                StringBuilder builder = new StringBuilder();
-                for (int i = 0; i < bytes.Length; i++)
-                {
-                    builder.Append(bytes[i].ToString("x2"));
-                }
-                return builder.ToString();
-            }
-        }
+
+
+
+        // -----用户注册----- //
 
         public User RegisterUser(string username, string password, string fullName, UserRole role)
         {
             // 首先检查数据库中用户名是否存在
             if (_dbService.GetUserByUsername(username) != null)
             {
-                Console.WriteLine("错误：用户名已存在。"); // DatabaseService AddUser 也会处理，但这里可以提前检查
+                Debug.WriteLine("错误：用户名已存在。"); // DatabaseService AddUser 也会处理，但这里可以提前检查
                 return null;
             }
 
             if (string.IsNullOrWhiteSpace(password))
             {
-                Console.WriteLine("错误：密码不能为空。");
+                Debug.WriteLine("错误：密码不能为空。");
                 return null;
             }
 
@@ -62,16 +60,22 @@ namespace ForestDecisionMauiApp.Services
 
             if (_dbService.AddUser(newUser))
             {
-                Console.WriteLine("用户注册成功！");
+                Debug.WriteLine("用户注册成功！");
                 return newUser;
             }
             else
             {
                 // AddUser 内部会打印更具体的数据库错误
-                Console.WriteLine("用户注册失败。");
+                Debug.WriteLine("用户注册失败。");
                 return null;
             }
         }
+
+
+
+
+
+        // -----用户登录----- //
 
         public User LoginUser(string username, string password)
         {
@@ -80,22 +84,46 @@ namespace ForestDecisionMauiApp.Services
             if (user == null)
             {
                 // GetUserByUsername 内部不打印 "用户名不存在"，所以这里可以打印
-                Console.WriteLine("错误：用户名不存在。");
+                Debug.WriteLine("错误：用户名不存在。");
                 return null;
             }
 
             string hashedPassword = HashPassword(password);
             if (user.PasswordHash == hashedPassword)
             {
-                Console.WriteLine($"欢迎回来, {user.FullName}!");
+                Debug.WriteLine($"欢迎回来, {user.FullName}!");
                 return user;
             }
             else
             {
-                Console.WriteLine("错误：密码不正确。");
+                Debug.WriteLine("错误：密码不正确。");
                 return null;
             }
         }
-        // SaveChangesToCsv 方法可以移除了
+
+
+
+
+
+
+        // -----密码安全----- //
+
+        // 使用 SHA256 哈希算法对密码进行加密
+        private string HashPassword(string password)
+        {
+            // (保留之前的 HashPassword 方法)
+            using (SHA256 sha256 = SHA256.Create())
+            {
+                byte[] bytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
+                StringBuilder builder = new StringBuilder();
+                for (int i = 0; i < bytes.Length; i++)
+                {
+                    builder.Append(bytes[i].ToString("x2"));
+                }
+                return builder.ToString();
+            }
+        }
+
+   
     }
 }
