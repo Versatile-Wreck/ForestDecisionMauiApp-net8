@@ -2,19 +2,27 @@
     x:Class="ForestDecisionMauiApp.AppShell"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:local="clr-namespace:ForestDecisionMauiApp.Views"
-    Shell.FlyoutBehavior="Disabled"
-    Title="ForestDecisionMauiApp">
+    xmlns:views="clr-namespace:ForestDecisionMauiApp.Views"
+    Title="森林智能决策系统">
 
     <ShellContent
         Title="登录"
         Route="LoginPage"
-        ContentTemplate="{DataTemplate local:LoginPage}"
-        Shell.TabBarIsVisible="False" />
-    <TabBar x:Name="MainTabBar" Route="AppMainContent">
-        <ShellContent
-            Title="森林数据"
-            ContentTemplate="{DataTemplate local:MainDataPage}"
-            Route="MainDataPage" />
-    </TabBar>
+        ContentTemplate="{DataTemplate views:LoginPage}"
+        Shell.FlyoutBehavior="Disabled" />
+
+    <FlyoutItem Title="主仪表盘" Icon="dashboard_icon.png" Route="DashboardPage">
+        <ShellContent ContentTemplate="{DataTemplate views:DashboardPage}" />
+    </FlyoutItem>
+
+    <FlyoutItem Title="监测点管理" Icon="sitelist_icon.png" Route="SiteManagementPage">
+        <ShellContent ContentTemplate="{DataTemplate views:SiteManagementPage}" />
+    </FlyoutItem>
+
+    <FlyoutItem Title="设置" Icon="settings_icon.png" Route="SettingsPage" IsVisible="{Binding IsAdmin}">
+        <ShellContent ContentTemplate="{DataTemplate views:SettingsPage}" />
+    </FlyoutItem>
+
+    <MenuItem Text="登出系统" IconImageSource="logout_icon.png" Command="{Binding LogoutCommand}" />
+
 </Shell>

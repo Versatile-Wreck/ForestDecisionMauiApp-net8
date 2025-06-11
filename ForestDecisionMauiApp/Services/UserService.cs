@@ -124,6 +124,26 @@ namespace ForestDecisionMauiApp.Services
             }
         }
 
-   
+
+
+        // -----其他用户管理方法----- //
+        public List<User> GetAllUsers()
+        {
+            return _dbService.GetAllUsers();
+        }
+
+        public bool UpdateUser(User user)
+        {
+            return _dbService.UpdateUser(user);
+        }
+
+        public bool DeleteUser(string userId)
+        {
+            return _dbService.DeleteUser(userId);
+        }
+        public User GetUserByUsername(string username)
+        {
+            return _dbService.GetUserByUsername(username);
+        }
     }
 }

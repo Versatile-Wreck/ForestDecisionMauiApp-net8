@@ -1,0 +1,54 @@
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:tabView="clr-namespace:Syncfusion.Maui.TabView;assembly=Syncfusion.Maui.TabView"
+             xmlns:charts="clr-namespace:Syncfusion.Maui.Charts;assembly=Syncfusion.Maui.Charts"
+             xmlns:viewModels="clr-namespace:ForestDecisionMauiApp.ViewModels"
+             x:Class="ForestDecisionMauiApp.Views.SiteDetailPage"
+             x:DataType="viewModels:SiteDetailViewModel"
+             Title="{Binding PageTitle}">
+
+    <Grid RowDefinitions="Auto,*" IsVisible="{Binding IsReady}">
+        <Label Grid.Row="0" Text="{Binding SiteDetails.LocationDescription}" FontSize="Header" FontAttributes="Bold" Padding="20,10" />
+
+        <tabView:SfTabView Grid.Row="1">
+            <tabView:SfTabItem Header="概览与建议">
+                <ScrollView Padding="20">
+                    <VerticalStackLayout Spacing="15">
+                        <Label Text="基础信息" FontSize="Title" FontAttributes="Bold" />
+                        <Label Text="当前决策建议" FontSize="Title" FontAttributes="Bold" Margin="0,20,0,0"/>
+                        <CollectionView ItemsSource="{Binding CurrentRecommendations}">
+                        </CollectionView>
+                    </VerticalStackLayout>
+                </ScrollView>
+            </tabView:SfTabItem>
+
+            <tabView:SfTabItem Header="历史数据与图表">
+                <Grid RowDefinitions="*,Auto" Padding="20" RowSpacing="10">
+                    <charts:SfCartesianChart Grid.Row="0" Title="养分历史趋势">
+                        <charts:SfCartesianChart.XAxes>
+                            <charts:DateTimeAxis/>
+                        </charts:SfCartesianChart.XAxes>
+                        <charts:SfCartesianChart.YAxes>
+                            <charts:NumericalAxis/>
+                        </charts:SfCartesianChart.YAxes>
+
+                        <charts:LineSeries ItemsSource="{Binding HistoricalReadings}" XBindingPath="Timestamp" YBindingPath="NitrogenAvailable" Label="速效氮" />
+                        <charts:LineSeries ItemsSource="{Binding HistoricalReadings}" XBindingPath="Timestamp" YBindingPath="PhosphorusAvailable" Label="速效磷" />
+                        <charts:LineSeries ItemsSource="{Binding HistoricalReadings}" XBindingPath="Timestamp" YBindingPath="PotassiumAvailable" Label="速效钾" />
+
+                        <charts:SfCartesianChart.Legend>
+                            <charts:ChartLegend/>
+                        </charts:SfCartesianChart.Legend>
+                    </charts:SfCartesianChart>
+                </Grid>
+            </tabView:SfTabItem>
+
+            <tabView:SfTabItem Header="操作日志">
+                <Label Text="操作日志功能待实现" HorizontalOptions="Center" VerticalOptions="Center"/>
+            </tabView:SfTabItem>
+
+        </tabView:SfTabView>
+
+        <ActivityIndicator IsRunning="{Binding IsBusy}" VerticalOptions="Center" HorizontalOptions="Center" Grid.RowSpan="2"/>
+    </Grid>
+</ContentPage>

@@ -11,6 +11,8 @@ namespace ForestDecisionMauiApp.ViewModels
     {
         private readonly UserService _userService;
         // No need to inject Navigation here, Shell handles it or pass it from Page
+        private readonly AuthenticationService _authService; // 新增
+
 
         [ObservableProperty] // Generates Username property with change notification
         private string _username;
@@ -21,9 +23,10 @@ namespace ForestDecisionMauiApp.ViewModels
         [ObservableProperty]
         private string _loginMessage;
 
-        public LoginViewModel(UserService userService)
+        public LoginViewModel(UserService userService, AuthenticationService authService)
         {
             _userService = userService;
+            _authService = authService; // 注入
         }
 
         [RelayCommand] // Generates LoginCommand
@@ -39,6 +42,8 @@ namespace ForestDecisionMauiApp.ViewModels
             var user = _userService.LoginUser(Username, Password); // Your existing LoginUser method
             if (user != null)
             {
+                _authService.Login(user); // **登录成功后，设置当前用户**
+
                 LoginMessage = $"欢迎 {user.FullName}!";
                 await Application.Current.MainPage.DisplayAlert("登录成功", LoginMessage, "OK");
 
@@ -48,8 +53,8 @@ namespace ForestDecisionMauiApp.ViewModels
                     appShellInstance.SetMainUITabBarVisibility(true);
                 }
 
-                // 导航到 MainDataPage
-                await Shell.Current.GoToAsync($"//AppMainContent/{nameof(MainDataPage)}");
+                // 导航
+                await Shell.Current.GoToAsync($"//{nameof(DashboardPage)}");
             }
             else
             {

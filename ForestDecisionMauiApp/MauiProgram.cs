@@ -4,17 +4,24 @@ using ForestDecisionMauiApp.Services; // Add this
 using ForestDecisionMauiApp.ViewModels; // We'll create these soon
 using ForestDecisionMauiApp.Views;      // We'll create these soon
 using ForestDecisionMauiApp.Services;
-using CommunityToolkit.Maui; // <--- 添加 using
+using CommunityToolkit.Maui;
+using Syncfusion.Maui.Core.Hosting;
+using CommunityToolkit.Maui.Views;
 
 namespace ForestDecisionMauiApp;
 public static class MauiProgram
 {
     public static MauiApp CreateMauiApp()
     {
+
+        string syncfusionLicenseKey = "Ngo9BigBOggjHTQxAR8/V1NNaF1cWWhPYVJxWmFZfVtgd19FY1ZQRmYuP1ZhSXxWdkNiWX9dc3dURGZaWUR9XUs=";
+        Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense(syncfusionLicenseKey);
+
         var builder = MauiApp.CreateBuilder();
         builder
             .UseMauiApp<App>()
             .UseMauiCommunityToolkit() // <--- 初始化 Community Toolkit
+            .ConfigureSyncfusionCore()
             .ConfigureFonts(fonts =>
             {
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
@@ -25,29 +32,37 @@ public static class MauiProgram
         builder.Logging.AddDebug();
 #endif
 
-        // Register Services (Singleton or Transient as appropriate)
-        // DatabaseService should ideally be singleton to manage one DB connection/file.
+        // --- Services ---
         builder.Services.AddSingleton<DatabaseService>();
-        // UserService can be transient or scoped if it doesn't hold long-lived state,
-        // or singleton if it primarily orchestrates calls to DatabaseService.
-        // For simplicity here, let's make it singleton too.
         builder.Services.AddSingleton<UserService>();
+        builder.Services.AddSingleton<DecisionService>();
+        builder.Services.AddSingleton<AuthenticationService>();
 
-        builder.Services.AddSingleton<DecisionService>(); // <-- 新增对 DecisionService 的注册
-
-        // Register ViewModels (typically Transient)
+        // --- ViewModels ---
+        builder.Services.AddSingleton<AppShellViewModel>(); // Shell ViewModel 最好是单例
         builder.Services.AddTransient<LoginViewModel>();
-        builder.Services.AddTransient<RegisterViewModel>(); // You'll add this later
-        builder.Services.AddTransient<MainDataViewModel>(); // You'll add this later
+        builder.Services.AddTransient<RegisterViewModel>();
+        builder.Services.AddTransient<DashboardViewModel>(); // 新增
+        builder.Services.AddTransient<SiteManagementViewModel>(); // 重命名
+        builder.Services.AddTransient<AddEditSiteViewModel>();
+        builder.Services.AddTransient<SiteDetailViewModel>();
+        builder.Services.AddTransient<UserManagementViewModel>();
+        builder.Services.AddTransient<SettingsViewModel>();
+        builder.Services.AddTransient<AddEditUserViewModel>();
+        
+        // ... (以后还会有 SettingsViewModel 等)
 
-        // Register Pages (typically Transient)
+        // --- Pages/Views ---
+        builder.Services.AddSingleton<AppShell>(); // Shell 是单例
         builder.Services.AddTransient<LoginPage>();
-        builder.Services.AddTransient<RegisterPage>(); // You'll add this later
-        builder.Services.AddTransient<MainDataPage>();  // You'll add this later
-
-
-        builder.Services.AddTransient<AddEditSiteViewModel>(); // AddEditSiteViewModel 通常是 Transient
+        builder.Services.AddTransient<RegisterPage>();
+        builder.Services.AddTransient<DashboardPage>(); // 新增
+        builder.Services.AddTransient<SiteManagementPage>(); // 重命名
         builder.Services.AddTransient<AddEditSitePage>();
+        builder.Services.AddTransient<SettingsPage>(); // 新增
+        builder.Services.AddTransient<SiteDetailPage>();
+        builder.Services.AddTransient<UserManagementPage>();
+        builder.Services.AddTransient<AddEditUserPage>();
         // ...
 
         return builder.Build();

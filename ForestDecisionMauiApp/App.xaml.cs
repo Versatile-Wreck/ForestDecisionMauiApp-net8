@@ -8,11 +8,11 @@ namespace ForestDecisionMauiApp;
 
 public partial class App : Application
 {
-    public App()
+    public App(AppShell appShell)
     {
         InitializeComponent();
 
-        MainPage = new AppShell();
+        MainPage = appShell;
 
         // 设置全局未处理异常处理器
         AppDomain.CurrentDomain.UnhandledException += App_UnhandledException;

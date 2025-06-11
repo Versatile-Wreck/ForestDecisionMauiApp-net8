@@ -338,7 +338,58 @@ namespace ForestDecisionMauiApp.Services
             return users;
         }
 
+        // 删除用户
+        public bool DeleteUser(string userId)
+        {
+            if (string.IsNullOrWhiteSpace(userId)) return false;
+            try
+            {
+                using (var connection = new SqliteConnection(GetConnectionString()))
+                {
+                    connection.Open();
+                    var command = connection.CreateCommand();
+                    command.CommandText = "DELETE FROM Users WHERE UserID = $userID;";
+                    command.Parameters.AddWithValue("$userID", userId);
+                    return command.ExecuteNonQuery() > 0;
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"数据库错误 (DeleteUser): {ex.Message}");
+                return false;
+            }
+        }
 
+        // 更新用户信息
+        public bool UpdateUser(User user)
+        {
+            if (user == null || string.IsNullOrWhiteSpace(user.UserID)) return false;
+            try
+            {
+                using (var connection = new SqliteConnection(GetConnectionString()))
+                {
+                    connection.Open();
+                    var command = connection.CreateCommand();
+                    command.CommandText = @"
+                UPDATE Users SET 
+                    FullName = $fullName, 
+                    Role = $role 
+                WHERE UserID = $userID;";
+                    // 注意：通常不在这里直接修改用户名或密码，密码重置应有单独流程
+                    command.Parameters.AddWithValue("$fullName", user.FullName);
+                    command.Parameters.AddWithValue("$role", user.Role.ToString());
+                    command.Parameters.AddWithValue("$userID", user.UserID);
+                    return command.ExecuteNonQuery() > 0;
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"数据库错误 (UpdateUser): {ex.Message}");
+                return false;
+            }
+        }
+
+        
 
 
 

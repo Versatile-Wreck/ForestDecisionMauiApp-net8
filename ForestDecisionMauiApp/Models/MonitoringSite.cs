@@ -12,6 +12,8 @@ namespace ForestDecisionMauiApp.Models
         public PlotType PlotType { get; set; }
         public double? AreaHectares { get; set; } // 面积（公顷），可空
 
+        public string Region { get; set; } // <-- **在这里添加这一行**
+
         // 在实际应用中，这可能是一个更复杂的对象或通过ID关联
         public List<SoilNutrientReading> Readings { get; set; }
 

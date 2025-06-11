@@ -1,0 +1,78 @@
+﻿<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewModels="clr-namespace:ForestDecisionMauiApp.ViewModels"
+             xmlns:models="clr-namespace:ForestDecisionMauiApp.Models"
+             xmlns:converters="clr-namespace:ForestDecisionMauiApp.Converters"
+             xmlns:syncfusion="clr-namespace:Syncfusion.Maui.DataGrid;assembly=Syncfusion.Maui.DataGrid"
+             x:Class="ForestDecisionMauiApp.Views.SiteManagementPage"
+             x:DataType="viewModels:SiteManagementViewModel"
+             Title="森林数据监测">
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <converters:IsNotNullToBooleanConverter x:Key="IsNotNullToBool" />
+            <converters:InverseBoolConverter x:Key="InverseBoolConverter" />
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+
+    <Grid RowDefinitions="Auto,*" Padding="10" RowSpacing="10">
+
+        <VerticalStackLayout Grid.Row="0" Spacing="10">
+            <Label Text="监测点管理" FontSize="Header" FontAttributes="Bold"/>
+            <Grid ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="10">
+                <Button Grid.Column="0" Text="刷新列表" Command="{Binding LoadSitesCommand}" Style="{StaticResource SecondaryAction}" HorizontalOptions="Start"/>
+                <Button Grid.Column="1" Text="编辑选中项" Command="{Binding EditSiteCommand}" IsEnabled="{Binding SelectedSite, Converter={StaticResource IsNotNullToBool}}" IsVisible="{Binding CanEditSite}"/>
+                <Button Grid.Column="2" Text="删除选中项" Command="{Binding DeleteSiteCommand}" IsEnabled="{Binding SelectedSite, Converter={StaticResource IsNotNullToBool}}" BackgroundColor="IndianRed" TextColor="White" IsVisible="{Binding CanDeleteSite}"/>
+                <Button Grid.Column="3" Text="＋ 新增监测点" Command="{Binding AddNewSiteCommand}" Style="{StaticResource PrimaryAction}" IsVisible="{Binding CanAddSite}"/>
+            </Grid>
+            <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" HorizontalOptions="Center" />
+        </VerticalStackLayout>
+
+        <syncfusion:SfDataGrid
+                Grid.Row="1"
+                x:Name="dataGrid"
+                ItemsSource="{Binding Sites}"
+                SelectionChanged="OnGridSelectionChanged"
+                CellDoubleTapped="OnGridCellDoubleTapped"
+                SelectionMode="Single"
+                AutoGenerateColumnsMode="None"
+                SortingMode="Single"
+                ColumnWidthMode="Fill">
+
+            <syncfusion:SfDataGrid.DefaultStyle>
+                <syncfusion:DataGridStyle
+                    HeaderRowBackground="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray500}}"
+                    RowBackground="{AppThemeBinding Light=White, Dark={StaticResource Gray950}}"
+                    RowTextColor="{AppThemeBinding Light=Black, Dark=White}"
+                    HeaderRowTextColor="{AppThemeBinding Light={StaticResource Gray900}, Dark={StaticResource Gray200}}"
+                    GridLineColor="{AppThemeBinding Light={StaticResource Gray300}, Dark={StaticResource Gray500}}"
+
+                    SelectionBackground="{StaticResource PrimarySelectionBackgroundColor}"
+
+                    SelectedRowTextColor="{AppThemeBinding Light={StaticResource Primary}, Dark=White}"
+                    />
+            </syncfusion:SfDataGrid.DefaultStyle>
+            <syncfusion:SfDataGrid.Columns>
+                <syncfusion:DataGridTextColumn HeaderText="ID" MappingName="SiteID" CellPadding="10,0"/>
+                <syncfusion:DataGridTextColumn HeaderText="位置描述" MappingName="LocationDescription" CellPadding="10,0"/>
+                <syncfusion:DataGridTextColumn HeaderText="区域" MappingName="Region" CellPadding="10,0"/>
+                <syncfusion:DataGridTextColumn HeaderText="林龄组" MappingName="AgeClass" CellPadding="10,0"/>
+                <syncfusion:DataGridTextColumn HeaderText="立地指数" MappingName="SiteIndex" CellPadding="10,0"/>
+                <syncfusion:DataGridTextColumn HeaderText="类型" MappingName="PlotType" CellPadding="10,0"/>
+            </syncfusion:SfDataGrid.Columns>
+            <syncfusion:SfDataGrid.EmptyView>
+                <Label Text="没有监测点数据。点击“新增”或“刷新”。" HorizontalOptions="Center" VerticalOptions="Center" Margin="20"/>
+            </syncfusion:SfDataGrid.EmptyView>
+        </syncfusion:SfDataGrid>
+
+        
+
+        <Grid Grid.Row="1" ColumnDefinitions="*,*" ColumnSpacing="10" VerticalOptions="End" Padding="10">
+            <Button Grid.Column="0" Text="备份数据" Command="{Binding BackupDatabaseCommand}" Style="{StaticResource SecondaryAction}" HorizontalOptions="Start" />
+            <Button Grid.Column="1" Text="恢复数据" Command="{Binding RestoreDatabaseCommand}" BackgroundColor="DarkOrange" TextColor="White" HorizontalOptions="Start" />
+            <Button Text="登出系统" Command="{Binding LogoutCommand}" HorizontalOptions="End" Grid.Column="1" />
+        </Grid>
+
+    </Grid>
+</ContentPage>

@@ -1,4 +1,4 @@
-﻿// ViewModels/MainDataViewModel.cs
+﻿// ViewModels/SiteManagementViewModel.cs
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -15,10 +15,17 @@ using System.Diagnostics;
 
 namespace ForestDecisionMauiApp.ViewModels
 {
-    public partial class MainDataViewModel : ObservableObject
+    public partial class SiteManagementViewModel : ObservableObject
     {
         private readonly DatabaseService _dbService;
         private readonly DecisionService _decisionService;
+
+        private readonly AuthenticationService _authService;
+
+        // 为UI绑定创建权限属性
+        public bool CanAddSite => _authService.IsAdmin || _authService.IsResearcher;
+        public bool CanEditSite => _authService.IsAdmin || _authService.IsResearcher;
+        public bool CanDeleteSite => _authService.IsAdmin;
 
         // 用于在 XAML 中绑定监测点列表
         public ObservableCollection<MonitoringSite> Sites { get; } = new();
@@ -38,11 +45,40 @@ namespace ForestDecisionMauiApp.ViewModels
         [ObservableProperty]
         private SoilNutrientReading _latestReadingForDecision; // 保存用于决策的最新读数
 
+        // 修改命令的 CanExecute 逻辑
+        private bool CanExecuteEditOperation() => SelectedSite != null && CanEditSite;
+        private bool CanExecuteDeleteOperation() => SelectedSite != null && CanDeleteSite;
+
+
+
+        public bool CanAdd => _authService.IsAdmin || _authService.IsResearcher;
+        public bool CanEdit => _authService.IsAdmin || _authService.IsResearcher;
+        public bool CanDelete => _authService.IsAdmin;
+
+
+
+
         // 修改构造函数以注入 DecisionService
-        public MainDataViewModel(DatabaseService dbService, DecisionService decisionService)
+        public SiteManagementViewModel(DatabaseService dbService, DecisionService decisionService, AuthenticationService authService)
         {
             _dbService = dbService;
             _decisionService = decisionService; // <-- 注入 DecisionService
+            _authService = authService; // 保存实例
+
+            _authService.PropertyChanged += (s, e) =>
+            {
+                if (e.PropertyName == nameof(AuthenticationService.CurrentUser))
+                {
+                    // 当用户登录或登出时，刷新所有权限相关的属性和命令
+                    OnPropertyChanged(nameof(CanAdd));
+                    OnPropertyChanged(nameof(CanEdit));
+                    OnPropertyChanged(nameof(CanDelete));
+                    AddNewSiteCommand.NotifyCanExecuteChanged();
+                    EditSiteCommand.NotifyCanExecuteChanged();
+                    DeleteSiteCommand.NotifyCanExecuteChanged();
+                }
+            };
+
         }
 
         // 当 SelectedSite 属性变化时调用的方法 (由 ObservableProperty 自动生成部分方法)
@@ -58,10 +94,12 @@ namespace ForestDecisionMauiApp.ViewModels
             if (newValue != null)
             {
                 // 异步加载选中监测点的养分数据
+               // IsDetailsPanelVisible = true; // <-- 新增：当选中一项时，显示面板
                 _ = LoadReadingsForSiteAsync(newValue.SiteID); // 使用 _ 丢弃 Task，表示不等待完成 // 这个方法执行后会更新 LatestReadingForDecision
             }
             else
             {
+               // IsDetailsPanelVisible = false; // <-- 新增：当没有选中项时，隐藏面板
                 SelectedSiteReadings.Clear();
             }
 
@@ -198,7 +236,7 @@ namespace ForestDecisionMauiApp.ViewModels
         // ... (保留现有属性和方法) ...
 
         // 新增命令
-        [RelayCommand]
+        [RelayCommand(CanExecute = nameof(CanAddSite))]
         private async Task AddNewSiteAsync()
         {
             // 导航到新增页面，不带参数
@@ -208,14 +246,14 @@ namespace ForestDecisionMauiApp.ViewModels
         // --- 修改后的命令 ---
         private bool CanExecuteSiteOperation() => SelectedSite != null;
 
-        [RelayCommand(CanExecute = nameof(CanExecuteSiteOperation))] // 使用 CanExecute
+        [RelayCommand(CanExecute = nameof(CanExecuteEditOperation))] // 使用 CanExecute
         private async Task EditSiteAsync()
         {
             // SelectedSite 已通过 CanExecute 检查，确保不为 null
             await Shell.Current.GoToAsync($"{nameof(AddEditSitePage)}?siteId={Uri.EscapeDataString(SelectedSite.SiteID)}");
         }
 
-        [RelayCommand(CanExecute = nameof(CanExecuteSiteOperation))] // 使用 CanExecute
+        [RelayCommand(CanExecute = nameof(CanExecuteDeleteOperation))] // 使用 CanExecute
         private async Task DeleteSiteAsync()
         {
             // SelectedSite 已通过 CanExecute 检查，确保不为 null
@@ -413,6 +451,9 @@ namespace ForestDecisionMauiApp.ViewModels
                 await Application.Current.MainPage.DisplayAlert("恢复异常", $"恢复过程中发生错误: {ex.Message}", "好的");
             }
         }
+
+
+        
 
     }
 }

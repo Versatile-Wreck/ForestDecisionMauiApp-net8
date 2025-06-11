@@ -1,0 +1,51 @@
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewModels="clr-namespace:ForestDecisionMauiApp.ViewModels"
+             x:Class="ForestDecisionMauiApp.Views.DashboardPage"
+             x:DataType="viewModels:DashboardViewModel"
+             Title="主仪表盘">
+    <ScrollView>
+        <VerticalStackLayout Spacing="20" Padding="20">
+            <Label 
+                Text="系统概览"
+                FontSize="Header"
+                FontAttributes="Bold"
+                HorizontalOptions="Center" />
+
+            <Grid ColumnDefinitions="*,*,*" ColumnSpacing="15">
+                <Frame Grid.Column="0" Style="{StaticResource CardView}">
+                    <VerticalStackLayout Style="{StaticResource CardContent}">
+                        <Label Text="监测点总数" Style="{StaticResource CardTitle}"/>
+                        <Label Text="{Binding TotalSitesCount}" Style="{StaticResource CardValue}"/>
+                    </VerticalStackLayout>
+                </Frame>
+                <Frame Grid.Column="1" Style="{StaticResource CardView}">
+                    <VerticalStackLayout Style="{StaticResource CardContent}">
+                        <Label Text="预警站点数" Style="{StaticResource CardTitle}"/>
+                        <Label Text="{Binding WarningSitesCount}" TextColor="OrangeRed" Style="{StaticResource CardValue}"/>
+                    </VerticalStackLayout>
+                </Frame>
+                <Frame Grid.Column="2" Style="{StaticResource CardView}">
+                    <VerticalStackLayout Style="{StaticResource CardContent}">
+                        <Label Text="最新数据时间" Style="{StaticResource CardTitle}"/>
+                        <Label Text="{Binding LatestDataTimestamp, StringFormat='{0:yyyy-MM-dd HH:mm}'}" Style="{StaticResource CardValue}"/>
+                    </VerticalStackLayout>
+                </Frame>
+            </Grid>
+
+            <Frame HeightRequest="300" Style="{StaticResource CardView}">
+                <Label Text="地图视图 (待实现)" HorizontalOptions="Center" VerticalOptions="Center"/>
+            </Frame>
+
+            <Frame Style="{StaticResource CardView}">
+                <VerticalStackLayout>
+                    <Label Text="最新预警" Style="{StaticResource CardTitle}"/>
+                    <Label Text="预警列表 (待实现)" HorizontalOptions="Center" VerticalOptions="Center" Margin="20"/>
+                </VerticalStackLayout>
+            </Frame>
+
+            <Button Text="刷新数据" Command="{Binding LoadDashboardDataCommand}" HorizontalOptions="Start"/>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>
