@@ -5,28 +5,49 @@
              xmlns:models="clr-namespace:ForestDecisionMauiApp.Models"
              x:Class="ForestDecisionMauiApp.Views.UserManagementPage"
              x:DataType="viewModels:UserManagementViewModel"
+             x:Name="thisPage"
              Title="用户管理">
 
-    <Grid RowDefinitions="Auto,*">
+    <Grid RowDefinitions="Auto,*" Padding="10" RowSpacing="10">
         <Button Grid.Row="0" Text="新增用户" Command="{Binding AddUserCommand}" HorizontalOptions="Start" Margin="10"/>
 
-        <syncfusion:SfDataGrid Grid.Row="1" ItemsSource="{Binding Users}" AutoGenerateColumnsMode="None">
+        <syncfusion:SfDataGrid 
+            Grid.Row="1" 
+            ItemsSource="{Binding Users}" 
+            AutoGenerateColumnsMode="None"
+            ColumnWidthMode="Fill" >
+
+
+            <syncfusion:SfDataGrid.DefaultStyle>
+                <syncfusion:DataGridStyle
+                HeaderRowBackground="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray500}}"
+                RowBackground="{AppThemeBinding Light=White, Dark={StaticResource Gray950}}"
+                RowTextColor="{AppThemeBinding Light=Black, Dark=White}"
+                HeaderRowTextColor="{AppThemeBinding Light={StaticResource Gray900}, Dark={StaticResource Gray200}}"
+                GridLineColor="{AppThemeBinding Light={StaticResource Gray300}, Dark={StaticResource Gray500}}"
+
+                SelectionBackground="{StaticResource PrimarySelectionBackgroundColor}"
+
+                SelectedRowTextColor="{AppThemeBinding Light={StaticResource Primary}, Dark=White}"
+                />
+            </syncfusion:SfDataGrid.DefaultStyle>
+            
             <syncfusion:SfDataGrid.Columns>
-                <syncfusion:DataGridTextColumn HeaderText="ID" MappingName="UserID" Width="100"/>
-                <syncfusion:DataGridTextColumn HeaderText="用户名" MappingName="Username"/>
-                <syncfusion:DataGridTextColumn HeaderText="全名" MappingName="FullName"/>
-                <syncfusion:DataGridTextColumn HeaderText="角色" MappingName="Role"/>
-                <syncfusion:DataGridTextColumn HeaderText="创建时间" MappingName="CreatedAt" Format="yyyy-MM-dd HH:mm"/>
-                <syncfusion:DataGridTemplateColumn HeaderText="操作">
+                <syncfusion:DataGridTextColumn HeaderText="ID" MappingName="UserID" Width="100" CellPadding="10,0"/>
+                <syncfusion:DataGridTextColumn HeaderText="用户名" MappingName="Username" CellPadding="10,0"/>
+                <syncfusion:DataGridTextColumn HeaderText="全名" MappingName="FullName" CellPadding="10,0"/>
+                <syncfusion:DataGridTextColumn HeaderText="角色" MappingName="Role" CellPadding="10,0"/>
+                <syncfusion:DataGridTextColumn HeaderText="创建时间" MappingName="CreatedAt" Format="yyyy-MM-dd HH:mm" CellPadding="10,0"/>
+                <syncfusion:DataGridTemplateColumn HeaderText="操作" CellPadding="10,0">
                     <syncfusion:DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
+                        <DataTemplate x:DataType="models:User">
                             <HorizontalStackLayout Spacing="10" Padding="5">
                                 <Button Text="编辑" 
-                                        Command="{Binding Source={RelativeSource AncestorType={x:Type viewModels:UserManagementViewModel}}, Path=EditUserCommand}"
+                                        Command="{Binding BindingContext.EditUserCommand, Source={x:Reference thisPage}}"
                                         CommandParameter="{Binding .}"/>
                                 <Button Text="删除" 
                                         BackgroundColor="IndianRed"
-                                        Command="{Binding Source={RelativeSource AncestorType={x:Type viewModels:UserManagementViewModel}}, Path=DeleteUserCommand}"
+                                        Command="{Binding BindingContext.DeleteUserCommand, Source={x:Reference thisPage}}"
                                         CommandParameter="{Binding .}"/>
                             </HorizontalStackLayout>
                         </DataTemplate>

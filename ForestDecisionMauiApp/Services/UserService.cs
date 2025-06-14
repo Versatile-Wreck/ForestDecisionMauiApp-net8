@@ -77,9 +77,9 @@ namespace ForestDecisionMauiApp.Services
 
         // -----用户登录----- //
 
-        public User LoginUser(string username, string password)
+        public async Task<User> LoginUser(string username, string password)
         {
-            var user = _dbService.GetUserByUsername(username);
+            var user = await _dbService.GetUserByUsername(username);
 
             if (user == null)
             {
@@ -100,8 +100,6 @@ namespace ForestDecisionMauiApp.Services
                 return null;
             }
         }
-
-
 
 
 
@@ -141,9 +139,13 @@ namespace ForestDecisionMauiApp.Services
         {
             return _dbService.DeleteUser(userId);
         }
-        public User GetUserByUsername(string username)
+        public async Task<User> GetUserByUsername(string username)
         {
-            return _dbService.GetUserByUsername(username);
+            return await _dbService.GetUserByUsername(username);
+        }
+        public User GetUserById(string userId)
+        {
+            return _dbService.GetUserById(userId);
         }
     }
 }

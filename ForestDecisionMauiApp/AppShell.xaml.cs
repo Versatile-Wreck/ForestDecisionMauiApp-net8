@@ -19,6 +19,7 @@ public partial class AppShell : Shell
         Routing.RegisterRoute(nameof(SiteDetailPage), typeof(SiteDetailPage));
         Routing.RegisterRoute(nameof(UserManagementPage), typeof(UserManagementPage)); // <-- 新增这一行
         Routing.RegisterRoute(nameof(AddEditUserPage), typeof(AddEditUserPage));
+        Routing.RegisterRoute(nameof(DataManagementPage), typeof(DataManagementPage));
     }
 
     private async void AppShell_Loaded(object sender, EventArgs e)
@@ -35,9 +36,6 @@ public partial class AppShell : Shell
         // 使用绝对路由 //LoginPage 是合适的。
         await Shell.Current.GoToAsync($"//{nameof(LoginPage)}");
     }
-
-
-
 
     // 可以添加一个公共方法来控制 TabBar 的可见性，供 ViewModel 调用
     public void SetMainUITabBarVisibility(bool isVisible)

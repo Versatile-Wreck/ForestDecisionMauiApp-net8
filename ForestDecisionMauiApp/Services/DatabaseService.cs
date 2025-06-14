@@ -263,14 +263,15 @@ namespace ForestDecisionMauiApp.Services
         }
 
         // 通过用户名获取用户信息
-        public User GetUserByUsername(string username)
+        public async Task<User>  GetUserByUsername(string username)
         {
             User user = null;
             try
             {
                 using (var connection = new SqliteConnection(GetConnectionString()))
                 {
-                    connection.Open();
+                    await connection.OpenAsync();  // ✅ 异步打开数据库
+                    // connection.Open();
                     var command = connection.CreateCommand();
                     command.CommandText = @"
                         SELECT UserID, Username, PasswordHash, FullName, Role, CreatedAt
@@ -279,9 +280,10 @@ namespace ForestDecisionMauiApp.Services
                     ";
                     command.Parameters.AddWithValue("$username", username);
 
-                    using (var reader = command.ExecuteReader())
+                    //using (var reader = command.ExecuteReader())
+                    using (var reader = await command.ExecuteReaderAsync()) // ✅ 异步执行查询
                     {
-                        if (reader.Read())
+                        if (await reader.ReadAsync()) // ✅ 异步读取数据
                         {
                             user = new User
                             {
@@ -299,6 +301,49 @@ namespace ForestDecisionMauiApp.Services
             catch (Exception ex)
             {
                 Debug.WriteLine($"数据库错误 (GetUserByUsername): {ex.Message}");
+            }
+            return user;
+        }
+
+        // 通过用户ID获取用户信息
+        public User GetUserById(string userId)
+        {
+            User user = null;
+            if (string.IsNullOrWhiteSpace(userId)) return null;
+
+            try
+            {
+                using (var connection = new SqliteConnection(GetConnectionString()))
+                {
+                    connection.Open();
+                    var command = connection.CreateCommand();
+                    command.CommandText = @"
+                    SELECT UserID, Username, PasswordHash, FullName, Role, CreatedAt
+                    FROM Users
+                    WHERE UserID = $userID;
+                ";
+                    command.Parameters.AddWithValue("$userID", userId);
+
+                    using (var reader = command.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            user = new User
+                            {
+                                UserID = reader.GetString(0),
+                                Username = reader.GetString(1),
+                                PasswordHash = reader.GetString(2),
+                                FullName = reader.GetString(3),
+                                Role = Enum.Parse<UserRole>(reader.GetString(4), true),
+                                CreatedAt = DateTime.Parse(reader.GetString(5)).ToLocalTime()
+                            };
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"数据库错误 (GetUserById for {userId}): {ex.Message}");
             }
             return user;
         }

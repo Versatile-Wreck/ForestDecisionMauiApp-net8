@@ -1,0 +1,37 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<ResourceDictionary 
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+
+    <Color x:Key="Primary">#2E7D32</Color>
+    <Color x:Key="PrimaryDark">#1B5E20</Color>
+    <Color x:Key="Secondary">#6D4C41</Color>
+    <Color x:Key="LightPageBackground">#F7F9F9</Color>
+    <Color x:Key="LightPrimaryText">#1B1C1B</Color>
+    <Color x:Key="LightSecondaryText">#5C5F61</Color>
+    <Color x:Key="LightFrameBackground">#FFFFFF</Color>
+    <Color x:Key="LightBorder">#E0E0E0</Color>
+    <Color x:Key="LightMuted">#F0F0F0</Color>
+
+    <Color x:Key="DarkPageBackground">#121212</Color>
+    <Color x:Key="DarkPrimaryText">#EAEAEA</Color>
+    <Color x:Key="DarkSecondaryText">#9E9E9E</Color>
+    <Color x:Key="DarkFrameBackground">#1E1E1E</Color>
+    <Color x:Key="DarkBorder">#424242</Color>
+    <Color x:Key="DarkMuted">#2a2a2a</Color>
+
+    <Color x:Key="White">#FFFFFF</Color>
+    <Color x:Key="Black">#000000</Color>
+    <Color x:Key="Success">#388E3C</Color>
+    <Color x:Key="Warning">#F57C00</Color>
+    <Color x:Key="Error">#D32F2F</Color>
+    <Color x:Key="Info">#0288D1</Color>
+
+    <SolidColorBrush x:Key="PageBackgroundColor" Color="{AppThemeBinding Light={StaticResource LightPageBackground}, Dark={StaticResource DarkPageBackground}}"/>
+    <SolidColorBrush x:Key="PrimaryTextColor" Color="{AppThemeBinding Light={StaticResource LightPrimaryText}, Dark={StaticResource DarkPrimaryText}}"/>
+    <SolidColorBrush x:Key="SecondaryTextColor" Color="{AppThemeBinding Light={StaticResource LightSecondaryText}, Dark={StaticResource DarkSecondaryText}}"/>
+    <SolidColorBrush x:Key="FrameBackgroundColor" Color="{AppThemeBinding Light={StaticResource LightFrameBackground}, Dark={StaticResource DarkFrameBackground}}"/>
+    <SolidColorBrush x:Key="BorderColor" Color="{AppThemeBinding Light={StaticResource LightBorder}, Dark={StaticResource DarkBorder}}"/>
+
+    <Color x:Key="PrimarySelectionBackgroundColor">#332E7D32</Color>
+</ResourceDictionary>

@@ -66,13 +66,5 @@
             </syncfusion:SfDataGrid.EmptyView>
         </syncfusion:SfDataGrid>
 
-        
-
-        <Grid Grid.Row="1" ColumnDefinitions="*,*" ColumnSpacing="10" VerticalOptions="End" Padding="10">
-            <Button Grid.Column="0" Text="备份数据" Command="{Binding BackupDatabaseCommand}" Style="{StaticResource SecondaryAction}" HorizontalOptions="Start" />
-            <Button Grid.Column="1" Text="恢复数据" Command="{Binding RestoreDatabaseCommand}" BackgroundColor="DarkOrange" TextColor="White" HorizontalOptions="Start" />
-            <Button Text="登出系统" Command="{Binding LogoutCommand}" HorizontalOptions="End" Grid.Column="1" />
-        </Grid>
-
     </Grid>
 </ContentPage>

@@ -34,7 +34,8 @@ namespace ForestDecisionMauiApp.ViewModels
         private async Task GoToDataManagement()
         {
             // 这里可以导航到我们之前设计的备份恢复页面
-            await Application.Current.MainPage.DisplayAlert("提示", "数据管理功能（备份/恢复）待整合到专属页面。", "好的");
+            // await Application.Current.MainPage.DisplayAlert("提示", "数据管理功能（备份/恢复）待整合到专属页面。", "好的");
+            await Shell.Current.GoToAsync(nameof(DataManagementPage));
         }
     }
 }

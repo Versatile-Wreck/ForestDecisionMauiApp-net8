@@ -2,6 +2,8 @@
 using ForestDecisionMauiApp.ViewModels;
 using ForestDecisionMauiApp.Models; // 确保引用了 MonitoringSite
 using Syncfusion.Maui.DataGrid; // <-- 新增 using 声明，为了方便使用 SfDataGrid 类型
+using System.ComponentModel; // <-- 确保有这个 using
+
 
 namespace ForestDecisionMauiApp.Views;
 
@@ -20,14 +22,14 @@ public partial class SiteManagementPage : ContentPage
 
     protected override async void OnAppearing()
     {
-        // OnAppearing 逻辑保持不变
-        // ...
-        if (BindingContext is SiteManagementViewModel vm)
+
+        // 加载数据逻辑保持不变
+        if (_viewModel.LoadSitesCommand.CanExecute(null))
         {
-            // ...
-            await vm.LoadSitesCommand.ExecuteAsync(null);
+            _viewModel.LoadSitesCommand.Execute(null);
         }
     }
+
 
     // --- 新增的事件处理方法 ---
     private void OnGridSelectionChanged(object sender, DataGridSelectionChangedEventArgs e)

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewModels="clr-namespace:ForestDecisionMauiApp.ViewModels"
+             x:Class="ForestDecisionMauiApp.Views.DataManagementPage"
+             x:DataType="viewModels:DataManagementViewModel"
+             Title="数据管理">
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <converters:InverseBoolConverter xmlns:converters="clr-namespace:ForestDecisionMauiApp.Converters" x:Key="InverseBoolConverter" />
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+    <ScrollView>
+        <VerticalStackLayout Spacing="15" Padding="30">
+            <Label Text="数据库管理" FontSize="Header" FontAttributes="Bold"/>
+            <Label Text="您可以在此将当前应用的所有数据（包括监测点、用户信息、养分记录等）备份到本地的一个 .db 文件中。" 
+                   TextColor="Gray" 
+                   LineBreakMode="WordWrap"/>
+
+            <Label Margin="0,10,0,0" FontAttributes="Bold" TextColor="Red">
+                <Label.FormattedText>
+                    <FormattedString>
+                        <Span Text="警告："/>
+                        <Span Text="恢复操作将会用您选择的备份文件完全覆盖当前的所有数据，此操作一旦执行将无法撤销，请谨慎操作！"/>
+                    </FormattedString>
+                </Label.FormattedText>
+            </Label>
+
+            <ActivityIndicator 
+                IsRunning="{Binding IsBusy}" 
+                IsVisible="{Binding IsBusy}" 
+                HorizontalOptions="Center" 
+                Margin="20"/>
+
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="20" Margin="0,20,0,0">
+                <Button Grid.Column="0" 
+                        Text="备份数据到本地..." 
+                        Command="{Binding BackupDatabaseCommand}"
+                        IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBoolConverter}}"/>
+
+                <Button Grid.Column="1" 
+                        Text="从备份文件恢复..." 
+                        Command="{Binding RestoreDatabaseCommand}"
+                        IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBoolConverter}}"/>
+            </Grid>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

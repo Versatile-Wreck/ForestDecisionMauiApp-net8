@@ -39,7 +39,7 @@ namespace ForestDecisionMauiApp.ViewModels
                 return;
             }
 
-            var user = _userService.LoginUser(Username, Password); // Your existing LoginUser method
+            var user = await _userService.LoginUser(Username, Password); // Your existing LoginUser method
             if (user != null)
             {
                 _authService.Login(user); // **登录成功后，设置当前用户**
